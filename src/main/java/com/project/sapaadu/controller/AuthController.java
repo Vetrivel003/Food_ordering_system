@@ -1,0 +1,22 @@
+package com.project.sapaadu.controller;
+
+import com.project.sapaadu.dto.request.RegisterRequest;
+import com.project.sapaadu.service.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final UserService userService;
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
+        userService.registerUser(request);
+        return ResponseEntity.ok("User registered successfully");
+    }
+}
