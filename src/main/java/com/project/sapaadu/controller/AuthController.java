@@ -1,5 +1,6 @@
 package com.project.sapaadu.controller;
 
+import com.project.sapaadu.dto.request.LoginRequest;
 import com.project.sapaadu.dto.request.RegisterRequest;
 import com.project.sapaadu.service.UserService;
 import jakarta.validation.Valid;
@@ -18,5 +19,11 @@ public class AuthController {
     public ResponseEntity<String> register(@Valid @RequestBody RegisterRequest request) {
         userService.registerUser(request);
         return ResponseEntity.ok("User registered successfully");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
+        userService.loginUser(request);
+        return ResponseEntity.ok("Login successful");
     }
 }

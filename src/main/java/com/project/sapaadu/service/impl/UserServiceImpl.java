@@ -1,5 +1,6 @@
 package com.project.sapaadu.service.impl;
 
+import com.project.sapaadu.dto.request.LoginRequest;
 import com.project.sapaadu.dto.request.RegisterRequest;
 import com.project.sapaadu.entity.Role;
 import com.project.sapaadu.entity.User;
@@ -51,5 +52,20 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         userRoleRepository.save(mapping);
+    }
+
+    @Override
+    public void loginUser(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+
+        if (user.isBlocked()) {
+            throw new BadRequestException("User is blocked");
+        }
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+            throw new BadRequestException("Invalid credentials");
+        }
     }
 }
