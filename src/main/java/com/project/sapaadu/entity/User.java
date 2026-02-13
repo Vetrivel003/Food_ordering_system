@@ -36,10 +36,10 @@ public class User {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private Set<UserRole> userRoles;
-//
-//    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
-//    private Set<Restaurant> restaurants;
-//
+
+    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    private Set<Restaurant> restaurants;
+
 //    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
 //    private Set<Order> orders;
 //

@@ -1,10 +1,10 @@
 package com.project.sapaadu.service.impl;
 
 import com.project.sapaadu.dto.request.AddToCartRequest;
-import com.project.sapaadu.entity.Cart;
-import com.project.sapaadu.entity.CartItem;
-import com.project.sapaadu.entity.MenuItem;
-import com.project.sapaadu.entity.User;
+import com.project.sapaadu.dto.response.CartItemResponse;
+import com.project.sapaadu.dto.response.CartResponse;
+import com.project.sapaadu.dto.response.RestaurantCartGroupResponse;
+import com.project.sapaadu.entity.*;
 import com.project.sapaadu.exception.BadRequestException;
 import com.project.sapaadu.repository.CartItemRepository;
 import com.project.sapaadu.repository.CartRepository;
@@ -13,6 +13,10 @@ import com.project.sapaadu.repository.UserRepository;
 import com.project.sapaadu.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,4 +63,52 @@ public class CartServiceImpl implements CartService {
 
         cartItemRepository.save(cartItem);
     }
+
+
+    @Override
+    public CartResponse getCart(Long userId) {
+
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(() -> new BadRequestException("Cart not found"));
+
+        Map<Long, List<CartItem>> grouped = cart.getCartItems()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        item -> item.getMenuItem().getRestaurant().getId()
+                ));
+
+        List<RestaurantCartGroupResponse> restaurantGroups = grouped.entrySet()
+                .stream()
+                .map(entry -> {
+
+                    Long restaurantId = entry.getKey();
+                    Restaurant restaurant = entry.getValue()
+                            .get(0)
+                            .getMenuItem()
+                            .getRestaurant();
+
+                    List<CartItemResponse> items = entry.getValue()
+                            .stream()
+                            .map(item -> CartItemResponse.builder()
+                                    .menuItemId(item.getMenuItem().getId())
+                                    .name(item.getMenuItem().getName())
+                                    .quantity(item.getQuantity())
+                                    .price(item.getPriceAtAdd())
+                                    .build())
+                            .toList();
+
+                    return RestaurantCartGroupResponse.builder()
+                            .restaurantId(restaurantId)
+                            .restaurantName(restaurant.getName())
+                            .items(items)
+                            .build();
+                })
+                .toList();
+
+        return CartResponse.builder()
+                .userId(userId)
+                .restaurants(restaurantGroups)
+                .build();
+    }
+
 }
