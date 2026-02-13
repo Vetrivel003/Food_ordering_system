@@ -1,6 +1,7 @@
 package com.project.sapaadu.service.impl;
 
 import com.project.sapaadu.dto.request.CreateRestaurantRequest;
+import com.project.sapaadu.dto.response.RestaurantResponse;
 import com.project.sapaadu.entity.Restaurant;
 import com.project.sapaadu.entity.User;
 import com.project.sapaadu.exception.BadRequestException;
@@ -9,6 +10,8 @@ import com.project.sapaadu.repository.UserRepository;
 import com.project.sapaadu.service.RestaurantService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +44,18 @@ public class RestaurantServiceImpl implements RestaurantService {
         restaurant.setApproved(true);
 
         restaurantRepository.save(restaurant);
+    }
+
+    @Override
+    public List<RestaurantResponse> getAvailableRestaurants() {
+
+        return restaurantRepository.findByIsApprovedTrueAndIsOpenTrue()
+                .stream()
+                .map(restaurant -> RestaurantResponse.builder()
+                        .id(restaurant.getId())
+                        .name(restaurant.getName())
+                        .description(restaurant.getDescription())
+                        .build())
+                .toList();
     }
 }
