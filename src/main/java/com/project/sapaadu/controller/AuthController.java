@@ -2,6 +2,7 @@ package com.project.sapaadu.controller;
 
 import com.project.sapaadu.dto.request.LoginRequest;
 import com.project.sapaadu.dto.request.RegisterRequest;
+import com.project.sapaadu.dto.response.LoginResponse;
 import com.project.sapaadu.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +23,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest request) {
-        userService.loginUser(request);
-        return ResponseEntity.ok("Login successful");
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(userService.loginUser(request));
     }
 }

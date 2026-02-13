@@ -2,6 +2,7 @@ package com.project.sapaadu.service.impl;
 
 import com.project.sapaadu.dto.request.LoginRequest;
 import com.project.sapaadu.dto.request.RegisterRequest;
+import com.project.sapaadu.dto.response.LoginResponse;
 import com.project.sapaadu.entity.Role;
 import com.project.sapaadu.entity.User;
 import com.project.sapaadu.entity.UserRole;
@@ -13,6 +14,9 @@ import com.project.sapaadu.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +59,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void loginUser(LoginRequest request) {
+    public LoginResponse loginUser(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid credentials"));
@@ -67,5 +71,17 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new BadRequestException("Invalid credentials");
         }
+
+        Set<String> roles = user.getUserRoles()
+                .stream()
+                .map(userRole -> userRole.getRole().getName())
+                .collect(Collectors.toSet());
+
+        return LoginResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .roles(roles)
+                .build();
     }
 }
