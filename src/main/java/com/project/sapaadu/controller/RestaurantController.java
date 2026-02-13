@@ -1,6 +1,8 @@
 package com.project.sapaadu.controller;
 
+import com.project.sapaadu.dto.request.CreateMenuItemRequest;
 import com.project.sapaadu.dto.request.CreateRestaurantRequest;
+import com.project.sapaadu.dto.response.MenuItemResponse;
 import com.project.sapaadu.dto.response.RestaurantResponse;
 import com.project.sapaadu.service.RestaurantService;
 import jakarta.validation.Valid;
@@ -36,6 +38,20 @@ public class RestaurantController {
     public ResponseEntity<List<RestaurantResponse>> getRestaurants() {
 
         return ResponseEntity.ok(restaurantService.getAvailableRestaurants());
+    }
+
+    @PostMapping("/menu")
+    public ResponseEntity<String> addMenuItem(
+            @Valid @RequestBody CreateMenuItemRequest request) {
+
+        restaurantService.addMenuItem(request);
+        return ResponseEntity.ok("Menu item added successfully");
+    }
+
+    @GetMapping("/{id}/menu")
+    public ResponseEntity<List<MenuItemResponse>> getMenuItems(@PathVariable Long id) {
+
+        return ResponseEntity.ok(restaurantService.getMenuItems(id));
     }
 
 
