@@ -31,4 +31,15 @@ public class RestaurantServiceImpl implements RestaurantService {
 
         restaurantRepository.save(restaurant);
     }
+
+    @Override
+    public void approveRestaurant(Long restaurantId) {
+
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new BadRequestException("Restaurant not found"));
+
+        restaurant.setApproved(true);
+
+        restaurantRepository.save(restaurant);
+    }
 }

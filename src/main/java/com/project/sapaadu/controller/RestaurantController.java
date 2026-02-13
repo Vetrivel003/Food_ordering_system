@@ -5,10 +5,7 @@ import com.project.sapaadu.service.RestaurantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/restaurants")
@@ -24,4 +21,12 @@ public class RestaurantController {
         restaurantService.createRestaurant(request);
         return ResponseEntity.ok("Restaurant created. Awaiting approval.");
     }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<String> approveRestaurant(@PathVariable Long id) {
+
+        restaurantService.approveRestaurant(id);
+        return ResponseEntity.ok("Restaurant approved successfully");
+    }
+
 }
