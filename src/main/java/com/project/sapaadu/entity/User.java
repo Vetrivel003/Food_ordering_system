@@ -40,11 +40,11 @@ public class User {
     @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
     private Set<Restaurant> restaurants;
 
-//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-//    private Set<Order> orders;
-//
-//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-//    private Set<Cart> carts;
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<Order> orders;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private Set<Cart> carts;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
