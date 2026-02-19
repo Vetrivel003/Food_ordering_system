@@ -22,9 +22,9 @@ public class CartController {
         return ResponseEntity.ok("Item added to cart");
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<CartResponse> getCart(@PathVariable Long userId) {
+    @GetMapping
+    public ResponseEntity<CartResponse> getCart() {
 
-        return ResponseEntity.ok(cartService.getCart(userId));
+        return ResponseEntity.ok(cartService.getCartForLoggedInUser());
     }
 }

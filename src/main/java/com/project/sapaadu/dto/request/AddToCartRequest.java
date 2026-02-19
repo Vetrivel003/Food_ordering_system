@@ -6,10 +6,6 @@ import lombok.Data;
 
 @Data
 public class AddToCartRequest {
-
-    @NotNull
-    private Long userId;
-
     @NotNull
     private Long menuItemId;
 

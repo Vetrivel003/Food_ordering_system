@@ -10,6 +10,7 @@ import com.project.sapaadu.repository.CartItemRepository;
 import com.project.sapaadu.repository.CartRepository;
 import com.project.sapaadu.repository.MenuItemRepository;
 import com.project.sapaadu.repository.UserRepository;
+import com.project.sapaadu.security.SecurityUtils;
 import com.project.sapaadu.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -32,7 +33,9 @@ public class CartServiceImpl implements CartService {
     @Override
     public void addToCart(AddToCartRequest request) {
 
-        User user = userRepository.findById(request.getUserId())
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
         MenuItem menuItem = menuItemRepository.findById(request.getMenuItemId())
@@ -66,8 +69,17 @@ public class CartServiceImpl implements CartService {
         cartItemRepository.save(cartItem);
     }
 
-
     @Override
+    public CartResponse getCartForLoggedInUser() {
+
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        return getCart(user.getId());
+    }
+
     public CartResponse getCart(Long userId) {
 
         Cart cart = cartRepository.findByUserId(userId)

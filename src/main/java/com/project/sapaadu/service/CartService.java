@@ -7,5 +7,5 @@ public interface CartService {
 
     void addToCart(AddToCartRequest request);
 
-    CartResponse getCart(Long userId);
+    CartResponse getCartForLoggedInUser();
 }
