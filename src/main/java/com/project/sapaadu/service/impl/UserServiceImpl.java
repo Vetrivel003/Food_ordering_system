@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
                 )
         );
 
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmailWithRoles(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
         String token = jwtUtil.generateToken(user.getEmail());
