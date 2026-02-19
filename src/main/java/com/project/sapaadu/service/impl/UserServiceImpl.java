@@ -10,8 +10,11 @@ import com.project.sapaadu.exception.BadRequestException;
 import com.project.sapaadu.repository.RoleRepository;
 import com.project.sapaadu.repository.UserRepository;
 import com.project.sapaadu.repository.UserRoleRepository;
+import com.project.sapaadu.security.JwtUtil;
 import com.project.sapaadu.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +29,8 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
     @Override
     public void registerUser(RegisterRequest request) {
@@ -61,16 +66,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public LoginResponse loginUser(LoginRequest request) {
 
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+                .orElseThrow(() -> new BadRequestException("User not found"));
 
-        if (user.isBlocked()) {
-            throw new BadRequestException("User is blocked");
-        }
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
-            throw new BadRequestException("Invalid credentials");
-        }
+        String token = jwtUtil.generateToken(user.getEmail());
 
         Set<String> roles = user.getUserRoles()
                 .stream()
@@ -78,10 +84,12 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toSet());
 
         return LoginResponse.builder()
+                .token(token)
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .roles(roles)
                 .build();
     }
+
 }
