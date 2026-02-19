@@ -14,6 +14,8 @@ import com.project.sapaadu.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -71,44 +73,66 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new BadRequestException("Cart not found"));
 
-        Map<Long, List<CartItem>> grouped = cart.getCartItems()
-                .stream()
-                .collect(Collectors.groupingBy(
-                        item -> item.getMenuItem().getRestaurant().getId()
-                ));
+        // Step 1: Group items by restaurantId
+        Map<Long, List<CartItem>> grouped = new HashMap<>();
 
-        List<RestaurantCartGroupResponse> restaurantGroups = grouped.entrySet()
-                .stream()
-                .map(entry -> {
+        for (CartItem item : cart.getCartItems()) {
 
-                    Long restaurantId = entry.getKey();
-                    Restaurant restaurant = entry.getValue()
-                            .get(0)
-                            .getMenuItem()
-                            .getRestaurant();
+            Long restaurantId = item.getMenuItem()
+                    .getRestaurant()
+                    .getId();
 
-                    List<CartItemResponse> items = entry.getValue()
-                            .stream()
-                            .map(item -> CartItemResponse.builder()
-                                    .menuItemId(item.getMenuItem().getId())
-                                    .name(item.getMenuItem().getName())
-                                    .quantity(item.getQuantity())
-                                    .price(item.getPriceAtAdd())
-                                    .build())
-                            .toList();
+            if (!grouped.containsKey(restaurantId)) {
+                grouped.put(restaurantId, new ArrayList<>());
+            }
 
-                    return RestaurantCartGroupResponse.builder()
+            grouped.get(restaurantId).add(item);
+        }
+
+        // Step 2: Build restaurant response list
+        List<RestaurantCartGroupResponse> restaurantGroups = new ArrayList<>();
+
+        for (Map.Entry<Long, List<CartItem>> entry : grouped.entrySet()) {
+
+            Long restaurantId = entry.getKey();
+            List<CartItem> cartItems = entry.getValue();
+
+            // Get restaurant info from first item
+            Restaurant restaurant = cartItems.get(0)
+                    .getMenuItem()
+                    .getRestaurant();
+
+            // Build item response list
+            List<CartItemResponse> items = new ArrayList<>();
+
+            for (CartItem cartItem : cartItems) {
+
+                CartItemResponse response = CartItemResponse.builder()
+                        .menuItemId(cartItem.getMenuItem().getId())
+                        .name(cartItem.getMenuItem().getName())
+                        .quantity(cartItem.getQuantity())
+                        .price(cartItem.getPriceAtAdd())
+                        .build();
+
+                items.add(response);
+            }
+
+            RestaurantCartGroupResponse groupResponse =
+                    RestaurantCartGroupResponse.builder()
                             .restaurantId(restaurantId)
                             .restaurantName(restaurant.getName())
                             .items(items)
                             .build();
-                })
-                .toList();
 
+            restaurantGroups.add(groupResponse);
+        }
+
+        // Final return statement
         return CartResponse.builder()
                 .userId(userId)
                 .restaurants(restaurantGroups)
                 .build();
     }
+
 
 }
