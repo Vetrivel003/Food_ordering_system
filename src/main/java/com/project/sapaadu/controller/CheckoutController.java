@@ -16,10 +16,10 @@ public class CheckoutController {
 
     private final CheckoutService checkoutService;
 
-    @PostMapping("/preview/{userId}")
-    public ResponseEntity<CheckoutPreviewResponse> preview(@PathVariable Long userId) {
+    @PostMapping("/preview/")
+    public ResponseEntity<CheckoutPreviewResponse> preview() {
 
-        return ResponseEntity.ok(checkoutService.previewCheckout(userId));
+        return ResponseEntity.ok(checkoutService.previewCheckout());
     }
 
     @PostMapping("/confirm")

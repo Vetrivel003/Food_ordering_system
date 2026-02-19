@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CheckoutService {
 
-    CheckoutPreviewResponse previewCheckout(Long userId);
+    CheckoutPreviewResponse previewCheckout();
 
     List<Long> confirmCheckout(CheckoutConfirmRequest request);
 

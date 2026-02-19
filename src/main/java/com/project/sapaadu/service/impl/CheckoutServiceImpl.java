@@ -6,10 +6,8 @@ import com.project.sapaadu.dto.response.InvalidRestaurantResponse;
 import com.project.sapaadu.dto.response.ValidRestaurantPreviewResponse;
 import com.project.sapaadu.entity.*;
 import com.project.sapaadu.exception.BadRequestException;
-import com.project.sapaadu.repository.CartItemRepository;
-import com.project.sapaadu.repository.CartRepository;
-import com.project.sapaadu.repository.OrderItemRepository;
-import com.project.sapaadu.repository.OrderRepository;
+import com.project.sapaadu.repository.*;
+import com.project.sapaadu.security.SecurityUtils;
 import com.project.sapaadu.service.CheckoutService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -26,12 +24,19 @@ public class CheckoutServiceImpl implements CheckoutService {
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartItemRepository cartItemRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public CheckoutPreviewResponse previewCheckout(Long userId) {
+    public CheckoutPreviewResponse previewCheckout() {
 
-        Cart cart = cartRepository.findByUserId(userId)
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new BadRequestException("Cart not found"));
+
 
         if (cart.getCartItems().isEmpty()) {
             throw new BadRequestException("Cart is empty");
@@ -97,8 +102,14 @@ public class CheckoutServiceImpl implements CheckoutService {
     @Override
     public List<Long> confirmCheckout(CheckoutConfirmRequest request) {
 
-        Cart cart = cartRepository.findByUserId(request.getUserId())
+        String email = SecurityUtils.getCurrentUserEmail();
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new BadRequestException("User not found"));
+
+        Cart cart = cartRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new BadRequestException("Cart not found"));
+
 
         if (cart.getCartItems().isEmpty()) {
             throw new BadRequestException("Cart is empty");

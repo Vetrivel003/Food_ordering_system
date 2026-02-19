@@ -9,9 +9,6 @@ import java.util.List;
 @Data
 public class CheckoutConfirmRequest {
 
-    @NotNull
-    private Long userId;
-
     @NotEmpty
     private List<Long> restaurantIds;
 }
