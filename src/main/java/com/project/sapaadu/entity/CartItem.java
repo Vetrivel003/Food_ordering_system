@@ -3,6 +3,7 @@ package com.project.sapaadu.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,7 +31,7 @@ public class CartItem {
     private Integer quantity;
 
     @Column(name = "price_at_add", nullable = false)
-    private Double priceAtAdd;
+    private BigDecimal priceAtAdd;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

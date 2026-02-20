@@ -3,6 +3,7 @@ package com.project.sapaadu.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,8 +29,8 @@ public class MenuItem {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private Double price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @Column(name = "is_available", nullable = false)
     private boolean isAvailable = true;

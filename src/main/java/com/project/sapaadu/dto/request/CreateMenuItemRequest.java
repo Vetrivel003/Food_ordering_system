@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class CreateMenuItemRequest {
 
@@ -17,5 +19,5 @@ public class CreateMenuItemRequest {
     private String description;
 
     @NotNull
-    private Double price;
+    private BigDecimal price;
 }

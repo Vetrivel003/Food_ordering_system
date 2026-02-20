@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -79,9 +80,16 @@ public class CheckoutServiceImpl implements CheckoutService {
                 continue;
             }
 
-            Double total = items.stream()
-                    .map(item -> item.getPriceAtAdd() * item.getQuantity())
-                    .reduce(0.0, Double::sum);
+            BigDecimal total = BigDecimal.ZERO;
+
+            for (CartItem item : items) {
+
+                BigDecimal itemTotal =
+                        item.getPriceAtAdd()
+                                .multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                total = total.add(itemTotal);
+            }
 
             validList.add(
                     ValidRestaurantPreviewResponse.builder()
@@ -145,9 +153,16 @@ public class CheckoutServiceImpl implements CheckoutService {
 
             List<CartItem> items = entry.getValue();
 
-            Double total = items.stream()
-                    .map(item -> item.getPriceAtAdd() * item.getQuantity())
-                    .reduce(0.0, Double::sum);
+            BigDecimal total = BigDecimal.ZERO;
+
+            for (CartItem item : items) {
+
+                BigDecimal itemTotal =
+                        item.getPriceAtAdd()
+                                .multiply(BigDecimal.valueOf(item.getQuantity()));
+
+                total = total.add(itemTotal);
+            }
 
             Order order = Order.builder()
                     .user(cart.getUser())
