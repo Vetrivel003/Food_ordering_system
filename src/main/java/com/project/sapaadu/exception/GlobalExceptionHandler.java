@@ -10,13 +10,24 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ErrorResponse> handleApiException(
             ApiException ex,
             HttpServletRequest request) {
+
+        log.warn("API Exception occurred: status={}, message={}, path={}",
+                ex.getStatus(),
+                ex.getMessage(),
+                request.getRequestURI());
 
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
@@ -34,6 +45,10 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request) {
 
+        log.error("Unexpected error occurred at path={}",
+                request.getRequestURI(),
+                ex);
+
         ErrorResponse response = ErrorResponse.builder()
                 .timestamp(LocalDateTime.now())
                 .status(500)
@@ -49,6 +64,8 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleValidationException(
             MethodArgumentNotValidException ex,
             HttpServletRequest request) {
+
+        log.warn("Validation failed at path={}", request.getRequestURI());
 
         Map<String, String> errors = new HashMap<>();
 
