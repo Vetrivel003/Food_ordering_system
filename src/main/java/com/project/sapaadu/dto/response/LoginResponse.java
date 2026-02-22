@@ -9,7 +9,8 @@ import java.util.Set;
 @Builder
 public class LoginResponse {
 
-    private String token;
+    private String accessToken;
+    private String refreshToken;
 
     private Long id;
     private String name;

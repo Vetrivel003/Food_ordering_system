@@ -3,6 +3,7 @@ package com.project.sapaadu.service.impl;
 import com.project.sapaadu.dto.request.LoginRequest;
 import com.project.sapaadu.dto.request.RegisterRequest;
 import com.project.sapaadu.dto.response.LoginResponse;
+import com.project.sapaadu.entity.RefreshToken;
 import com.project.sapaadu.entity.Role;
 import com.project.sapaadu.entity.User;
 import com.project.sapaadu.entity.UserRole;
@@ -11,6 +12,7 @@ import com.project.sapaadu.repository.RoleRepository;
 import com.project.sapaadu.repository.UserRepository;
 import com.project.sapaadu.repository.UserRoleRepository;
 import com.project.sapaadu.security.JwtUtil;
+import com.project.sapaadu.service.RefreshTokenService;
 import com.project.sapaadu.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void registerUser(RegisterRequest request) {
@@ -76,7 +79,10 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmailWithRoles(request.getEmail())
                 .orElseThrow(() -> new BadRequestException("User not found"));
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        String accessToken = jwtUtil.generateToken(user.getEmail());
+
+        RefreshToken refreshToken =
+                refreshTokenService.createRefreshToken(user);
 
         Set<String> roles = user.getUserRoles()
                 .stream()
@@ -84,7 +90,8 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toSet());
 
         return LoginResponse.builder()
-                .token(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
