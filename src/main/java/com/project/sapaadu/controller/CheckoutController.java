@@ -5,6 +5,7 @@ import com.project.sapaadu.dto.response.CheckoutPreviewResponse;
 import com.project.sapaadu.service.CheckoutService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/checkout")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('USER')")
 public class CheckoutController {
 
     private final CheckoutService checkoutService;

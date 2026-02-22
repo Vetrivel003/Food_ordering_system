@@ -8,6 +8,7 @@ import com.project.sapaadu.service.RestaurantService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class RestaurantController {
 
     private final RestaurantService restaurantService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<String> createRestaurant(
             @Valid @RequestBody CreateRestaurantRequest request) {
@@ -27,6 +29,7 @@ public class RestaurantController {
         return ResponseEntity.ok("Restaurant created. Awaiting approval.");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}/approve")
     public ResponseEntity<String> approveRestaurant(@PathVariable Long id) {
 
@@ -34,12 +37,14 @@ public class RestaurantController {
         return ResponseEntity.ok("Restaurant approved successfully");
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping
     public ResponseEntity<List<RestaurantResponse>> getRestaurants() {
 
         return ResponseEntity.ok(restaurantService.getAvailableRestaurants());
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/menu")
     public ResponseEntity<String> addMenuItem(
             @Valid @RequestBody CreateMenuItemRequest request) {
@@ -48,6 +53,7 @@ public class RestaurantController {
         return ResponseEntity.ok("Menu item added successfully");
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @GetMapping("/{id}/menu")
     public ResponseEntity<List<MenuItemResponse>> getMenuItems(@PathVariable Long id) {
 
