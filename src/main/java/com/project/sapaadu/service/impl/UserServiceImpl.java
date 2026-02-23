@@ -124,4 +124,10 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
+    @Override
+    public void logout(String refreshToken) {
+
+        refreshTokenService.revokeRefreshToken(refreshToken);
+    }
+
 }
