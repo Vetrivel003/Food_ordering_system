@@ -1,8 +1,10 @@
 package com.project.sapaadu.controller;
 
 import com.project.sapaadu.dto.request.LoginRequest;
+import com.project.sapaadu.dto.request.RefreshRequest;
 import com.project.sapaadu.dto.request.RegisterRequest;
 import com.project.sapaadu.dto.response.LoginResponse;
+import com.project.sapaadu.dto.response.RefreshResponse;
 import com.project.sapaadu.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,5 +27,14 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(userService.loginUser(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponse> refreshToken(
+            @Valid @RequestBody RefreshRequest request) {
+
+        return ResponseEntity.ok(
+                userService.refreshToken(request)
+        );
     }
 }

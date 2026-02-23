@@ -1,8 +1,10 @@
 package com.project.sapaadu.service.impl;
 
 import com.project.sapaadu.dto.request.LoginRequest;
+import com.project.sapaadu.dto.request.RefreshRequest;
 import com.project.sapaadu.dto.request.RegisterRequest;
 import com.project.sapaadu.dto.response.LoginResponse;
+import com.project.sapaadu.dto.response.RefreshResponse;
 import com.project.sapaadu.entity.RefreshToken;
 import com.project.sapaadu.entity.Role;
 import com.project.sapaadu.entity.User;
@@ -96,6 +98,29 @@ public class UserServiceImpl implements UserService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .roles(roles)
+                .build();
+    }
+
+    @Override
+    public RefreshResponse refreshToken(RefreshRequest request) {
+
+        RefreshToken oldToken =
+                refreshTokenService.verifyRefreshToken(request.getRefreshToken());
+
+        User user = oldToken.getUser();
+
+        // Rotate token (revoke old)
+        refreshTokenService.revokeRefreshToken(oldToken.getToken());
+
+        // Generate new tokens
+        String newAccessToken = jwtUtil.generateToken(user.getEmail());
+
+        RefreshToken newRefreshToken =
+                refreshTokenService.createRefreshToken(user);
+
+        return RefreshResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken.getToken())
                 .build();
     }
 
