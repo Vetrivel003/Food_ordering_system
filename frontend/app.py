@@ -207,16 +207,48 @@ if st.session_state.access_token:
                     )
 
                     if preview_response.status_code == 200:
-                        preview = preview_response.json()
-                        st.success("Checkout Preview")
 
-                        st.json(preview)
+                        preview = preview_response.json()
+                        st.session_state.preview_data = preview
+                        st.success("Checkout Preview Ready")
 
                     else:
                         st.error("Preview failed.")
 
         else:
             st.error("Failed to load cart.")
+
+        if "preview_data" in st.session_state and st.session_state.preview_data:
+
+            preview = st.session_state.preview_data
+            st.subheader("Checkout Preview")
+
+            st.json(preview)
+
+            restaurant_ids = [
+                group["restaurantId"]
+                for group in cart["restaurants"]
+            ]
+
+            if st.button("Confirm Checkout"):
+
+                confirm_response = requests.post(
+                    f"{BASE_URL}/checkout/confirm",
+                    headers=get_headers(),
+                    json={"restaurantIds": restaurant_ids}
+                )
+
+                if confirm_response.status_code == 200:
+                    order_ids = confirm_response.json()
+
+                    st.success("Order(s) created successfully!")
+                    st.write("Order IDs:", order_ids)
+
+                    st.session_state.preview_data = None
+                    st.session_state.selected_restaurant = None
+
+                else:
+                    st.error("Checkout confirmation failed.")
 
 else:
     page = st.sidebar.radio("Select Option", ["Login", "Register"])
