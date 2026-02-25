@@ -92,9 +92,9 @@ if st.session_state.access_token:
     st.sidebar.success(f"Logged in as: {st.session_state.user_email}")
 
     menu = st.sidebar.selectbox(
-        "Navigation",
-        ["Restaurants", "Logout"]
-    )
+    "Navigation",
+    ["Restaurants", "Cart", "Logout"]
+)
 
     if menu == "Logout":
         logout_user()
@@ -173,6 +173,50 @@ if st.session_state.access_token:
                             st.divider()
             else:
                 st.error("Failed to load menu items.")
+
+    elif menu == "Cart":
+        st.subheader("🛒 Your Cart")
+
+        response = requests.get(
+            f"{BASE_URL}/cart",
+            headers=get_headers()
+        )
+
+        if response.status_code == 200:
+            cart = response.json()
+
+            if not cart["restaurants"]:
+                st.info("Cart is empty.")
+            else:
+                for group in cart["restaurants"]:
+                    st.markdown(f"### 🍴 {group['restaurantName']}")
+
+                    for item in group["items"]:
+                        st.write(
+                            f"{item['name']}  |  "
+                            f"Qty: {item['quantity']}  |  "
+                            f"₹ {item['price']}"
+                        )
+
+                    st.divider()
+
+                if st.button("Preview Checkout"):
+                    preview_response = requests.post(
+                        f"{BASE_URL}/checkout/preview/",
+                        headers=get_headers()
+                    )
+
+                    if preview_response.status_code == 200:
+                        preview = preview_response.json()
+                        st.success("Checkout Preview")
+
+                        st.json(preview)
+
+                    else:
+                        st.error("Preview failed.")
+
+        else:
+            st.error("Failed to load cart.")
 
 else:
     page = st.sidebar.radio("Select Option", ["Login", "Register"])
