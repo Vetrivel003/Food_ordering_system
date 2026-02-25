@@ -12,6 +12,13 @@ if "refresh_token" not in st.session_state:
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
+def get_headers():
+    if st.session_state.access_token:
+        return {
+            "Authorization": f"Bearer {st.session_state.access_token}"
+        }
+    return {}
+
 
 def login_user(email, password):
     response = requests.post(
@@ -65,7 +72,38 @@ if st.session_state.access_token:
     if st.sidebar.button("Logout"):
         logout_user()
 
-    st.info("Authentication working. Next step: Restaurants page.")
+    menu = st.sidebar.selectbox(
+    "Navigation",
+    ["Restaurants", "Logout"]
+)   
+
+    if menu == "Logout":
+        logout_user()
+
+    elif menu == "Restaurants":
+
+        st.subheader("Available Restaurants")
+
+        response = requests.get(
+        f"{BASE_URL}/restaurants",
+            headers=get_headers()
+    )
+
+    if response.status_code == 200:
+        restaurants = response.json()
+
+        if not restaurants:
+            st.info("No restaurants available.")
+        else:
+            for r in restaurants:
+                with st.container():
+                    st.markdown(f"### 🍴 {r['name']}")
+                    st.write(f"📍 Description: {r['description']}")
+                    st.divider()
+    elif response.status_code == 401:
+        st.error("Session expired. Please login again.")
+    else:
+        st.error("Failed to fetch restaurants.")
 
 else:
     page = st.sidebar.radio("Select Option", ["Login", "Register"])
