@@ -12,6 +12,9 @@ if "refresh_token" not in st.session_state:
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
+if "selected_restaurant" not in st.session_state:
+    st.session_state.selected_restaurant = None
+
 def get_headers():
     if st.session_state.access_token:
         return {
@@ -68,14 +71,13 @@ def logout_user():
 st.title("🍽️ Sapaadu Food Ordering System")
 
 if st.session_state.access_token:
+
     st.sidebar.success(f"Logged in as: {st.session_state.user_email}")
-    if st.sidebar.button("Logout"):
-        logout_user()
 
     menu = st.sidebar.selectbox(
-    "Navigation",
-    ["Restaurants", "Logout"]
-)   
+        "Navigation",
+        ["Restaurants", "Logout"]
+    )
 
     if menu == "Logout":
         logout_user()
@@ -85,25 +87,57 @@ if st.session_state.access_token:
         st.subheader("Available Restaurants")
 
         response = requests.get(
-        f"{BASE_URL}/restaurants",
+            f"{BASE_URL}/restaurants",
             headers=get_headers()
-    )
+        )
 
-    if response.status_code == 200:
-        restaurants = response.json()
+        if response.status_code == 200:
+            restaurants = response.json()
 
-        if not restaurants:
-            st.info("No restaurants available.")
+            if not restaurants:
+                st.info("No restaurants available.")
+            else:
+                for r in restaurants:
+                    with st.container():
+                        st.markdown(f"### 🍴 {r['name']}")
+                        st.write(f"📍 Description: {r['description']}")
+
+                        if st.button(
+                            f"View Menu - {r['id']}",
+                            key=f"view_{r['id']}"
+                        ):
+                            st.session_state.selected_restaurant = r
+
+                        st.divider()
+
+        elif response.status_code == 401:
+            st.error("Session expired. Please login again.")
         else:
-            for r in restaurants:
-                with st.container():
-                    st.markdown(f"### 🍴 {r['name']}")
-                    st.write(f"📍 Description: {r['description']}")
-                    st.divider()
-    elif response.status_code == 401:
-        st.error("Session expired. Please login again.")
-    else:
-        st.error("Failed to fetch restaurants.")
+            st.error("Failed to fetch restaurants.")
+
+        if st.session_state.selected_restaurant:
+
+            restaurant = st.session_state.selected_restaurant
+            st.subheader(f"Menu - {restaurant['name']}")
+
+            menu_response = requests.get(
+                f"{BASE_URL}/restaurants/{restaurant['id']}/menu",
+                headers=get_headers()
+            )
+
+            if menu_response.status_code == 200:
+                menu_items = menu_response.json()
+
+                if not menu_items:
+                    st.info("No menu items available.")
+                else:
+                    for item in menu_items:
+                        with st.container():
+                            st.markdown(f"**{item['name']}**")
+                            st.write(f"Price: ₹ {item['price']}")
+                            st.divider()
+            else:
+                st.error("Failed to load menu items.")
 
 else:
     page = st.sidebar.radio("Select Option", ["Login", "Register"])
