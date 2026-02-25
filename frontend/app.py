@@ -93,7 +93,7 @@ if st.session_state.access_token:
 
     menu = st.sidebar.selectbox(
     "Navigation",
-    ["Restaurants", "Cart", "Logout"]
+    ["Restaurants", "Cart", "Orders", "Logout"]
 )
 
     if menu == "Logout":
@@ -249,6 +249,61 @@ if st.session_state.access_token:
 
                 else:
                     st.error("Checkout confirmation failed.")
+        
+    elif menu == "Orders":
+
+        st.subheader("📦 My Orders")
+
+        response = requests.get(
+            f"{BASE_URL}/orders",
+            headers=get_headers()
+        )
+
+        if response.status_code == 200:
+            orders = response.json()
+
+            if not orders:
+                st.info("No orders found.")
+            else:
+                for order in orders:
+                    with st.container():
+                        st.markdown(
+                            f"### Order #{order['orderId']}"
+                        )
+                        st.write(f"Restaurant: {order['restaurantName']}")
+                        st.write(f"Total: ₹ {order['totalAmount']}")
+                        st.write(f"Status: {order['orderStatus']}")
+                        st.write(f"Date: {order['createdAt']}")
+
+                        if st.button(
+                            "View Details",
+                            key=f"detail_{order['orderId']}"
+                        ):
+
+                            detail_response = requests.get(
+                                f"{BASE_URL}/orders/{order['orderId']}",
+                                headers=get_headers()
+                            )
+
+                            if detail_response.status_code == 200:
+                                detail = detail_response.json()
+
+                                st.markdown("#### Order Items")
+
+                                for item in detail["items"]:
+                                    st.write(
+                                        f"{item['itemName']} | "
+                                        f"Qty: {item['quantity']} | "
+                                        f"₹ {item['price']}"
+                                    )
+
+                            else:
+                                st.error("Failed to load order details.")
+
+                        st.divider()
+
+        else:
+            st.error("Failed to load orders.")
 
 else:
     page = st.sidebar.radio("Select Option", ["Login", "Register"])
