@@ -67,6 +67,23 @@ def logout_user():
     st.session_state.user_email = None
     st.success("Logged out successfully")
 
+def add_to_cart(menu_item_id, quantity):
+    response = requests.post(
+        f"{BASE_URL}/cart/add",
+        headers=get_headers(),
+        json={
+            "menuItemId": menu_item_id,
+            "quantity": quantity
+        }
+    )
+
+    if response.status_code == 200:
+        st.success("Item added to cart")
+    elif response.status_code == 401:
+        st.error("Session expired. Please login again.")
+    else:
+        st.error(response.text)
+
 
 st.title("🍽️ Sapaadu Food Ordering System")
 
@@ -135,6 +152,24 @@ if st.session_state.access_token:
                         with st.container():
                             st.markdown(f"**{item['name']}**")
                             st.write(f"Price: ₹ {item['price']}")
+
+                            col1, col2 = st.columns([1, 1])
+
+                            with col1:
+                                quantity = st.number_input(
+                                    "Qty",
+                                    min_value=1,
+                                    value=1,
+                                    key=f"qty_{item['id']}"
+                                )
+
+                            with col2:
+                                if st.button(
+                                    "Add to Cart",
+                                    key=f"add_{item['id']}"
+                                ):
+                                    add_to_cart(item['id'], quantity)
+
                             st.divider()
             else:
                 st.error("Failed to load menu items.")
