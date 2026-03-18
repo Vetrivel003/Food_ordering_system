@@ -204,7 +204,7 @@ This is not just a CRUD app — it's a complete system that showcases how food o
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/sapaadu.git
+git clone https://github.com/Vetrivel003/sapaadu.git
 cd sapaadu
 ```
 
